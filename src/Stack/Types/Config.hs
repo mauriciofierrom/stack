@@ -360,6 +360,8 @@ data Config =
          -- ^ Any resolver override from the command line
          ,configStorage             :: !Storage
          -- ^ Database connection pool for Stack database
+         ,configRecommendUpgrade    :: !Bool
+         -- ^ Recommend a Stack upgrade?
          }
 
 -- | The project root directory, if in a project.
@@ -764,6 +766,8 @@ data ConfigMonoid =
     , configMonoidColorWhen          :: !(First ColorWhen)
     -- ^ When to use 'ANSI' colors
     , configMonoidStyles             :: !StylesUpdate
+    , configMonoidRecommendUpgrade   :: !FirstTrue
+    -- ^ See 'configRecommendUpgrade'
     }
   deriving (Show, Generic)
 
@@ -878,6 +882,8 @@ parseConfigMonoidObject rootDir obj = do
     configMonoidStylesGB <- obj ..:? configMonoidStylesGBName
     let configMonoidStyles = fromMaybe mempty $   configMonoidStylesUS
                                               <|> configMonoidStylesGB
+
+    configMonoidRecommendUpgrade <- FirstTrue <$> obj ..:? configMonoidRecommendUpgradeName
 
     return ConfigMonoid {..}
   where
@@ -1028,6 +1034,9 @@ configMonoidStylesUSName = "stack-colors"
 
 configMonoidStylesGBName :: Text
 configMonoidStylesGBName = "stack-colours"
+
+configMonoidRecommendUpgradeName :: Text
+configMonoidRecommendUpgradeName = "recommend-stack-upgrade"
 
 data ConfigException
   = ParseConfigFileException (Path Abs File) ParseException

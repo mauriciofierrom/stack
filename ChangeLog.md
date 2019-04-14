@@ -101,6 +101,12 @@ Behavior changes:
   addition, the `packagename> ` prefix is no longer included in
   interelaved mode when only building a single target.
 
+* Stack will check occassionally if there is a new version available and prompt
+  the user to upgrade. This will not incur any additional network traffic, as
+  it will piggy-back on the existing Hackage index updates. You can set
+  `recommend-stack-upgrade: false` to bypass this. See
+  [#1681](https://github.com/commercialhaskell/stack/issues/1681).
+
 Other enhancements:
 
 * Defer loading up of files for local packages. This allows us to get

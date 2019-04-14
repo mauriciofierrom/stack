@@ -26,6 +26,8 @@ module Stack.Storage
     , savePrecompiledCache
     , loadDockerImageExeCache
     , saveDockerImageExeCache
+    , upgradeChecksSince
+    , logUpgradeCheck
     ) where
 
 import qualified Data.ByteString as S
@@ -114,6 +116,10 @@ DockerImageExeCache
   compatible Bool
   DockerImageExeCacheUnique imageHash exePath exeTimestamp
   deriving Show
+
+-- History of checks for whether we should upgrade Stack
+UpgradeCheck
+  timestamp UTCTime
 |]
 
 -- | Initialize the database.
@@ -412,3 +418,11 @@ updateList recordCons parentFieldCons parentId indexFieldCons old new =
         insertMany_ $
             map (uncurry $ recordCons parentId) $
             Set.toList (Set.difference newSet oldSet)
+
+-- | How many upgrade checks have occurred since the given timestamp?
+upgradeChecksSince :: HasConfig env => UTCTime -> RIO env Int
+upgradeChecksSince since = withStorage $ count [UpgradeCheckTimestamp >=. since]
+
+-- | Log in the database that an upgrade check occurred at the given time.
+logUpgradeCheck :: HasConfig env => UTCTime -> RIO env ()
+logUpgradeCheck = withStorage . insert_ . UpgradeCheck
